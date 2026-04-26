@@ -1,0 +1,90 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Phase 3: Primitive Definition
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Allow access for specific demo UIDs (deterministic for the AI Studio preview environment)
+    function isDemoUser(uid) {
+      return uid in ['admin_demo_1', 'amb_demo_1'];
+    }
+
+    function isOwner(userId) {
+      return (isSignedIn() && request.auth.uid == userId) || (userId in ['admin_demo_1', 'amb_demo_1']);
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isAdmin(uid) {
+      // In a real app, we check the user doc. For demo, we check if the ID is the specific admin demo ID
+      // OR if the authenticated user has an 'admin' role in their own document.
+      return uid == 'admin_demo_1' || 
+             (isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+
+    // Pillar 2: Validation Blueprints
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email', 'role']) &&
+             data.email is string &&
+             data.role in ['admin', 'ambassador'];
+    }
+
+    function isValidCampaign(data) {
+      return data.keys().hasAll(['name', 'goal', 'adminId']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 200;
+    }
+
+    function isValidTask(data) {
+      return data.keys().hasAll(['campaignId', 'title', 'xpValue', 'status']) &&
+             data.status in ['pending', 'submitted', 'approved', 'rejected'];
+    }
+
+    // 1. Users Collection
+    match /users/{uid} {
+      allow get, list: if true; // Allow reading profiles for leaderboard and demo
+      
+      allow create: if (isSignedIn() || isDemoUser(uid)) && isValidUser(incoming()) && isValidId(uid);
+      
+      allow update: if (isSignedIn() || isDemoUser(uid)) && isValidUser(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'avatarUrl', 'campus', 'xp', 'level', 'streak', 'intelligenceScore', 'status', 'badges'])
+      );
+    }
+
+    // 2. Campaigns Collection
+    match /campaigns/{campaignId} {
+      allow read: if true;
+      allow create: if (isAdmin(request.auth.uid) || isAdmin('admin_demo_1')) && isValidCampaign(incoming());
+      allow update, delete: if (isAdmin(request.auth.uid) || isAdmin('admin_demo_1'));
+    }
+
+    // 3. Tasks Collection
+    match /tasks/{taskId} {
+      allow read: if true;
+      allow create: if (isAdmin(request.auth.uid) || isAdmin('admin_demo_1')) && isValidTask(incoming());
+      allow update: if (
+        // Admin approving
+        (isAdmin(request.auth.uid) || isAdmin('admin_demo_1')) ||
+        // Ambassador submitting
+        (isOwner(existing().ambassadorId) && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'proofUrl', 'submittedAt', 'aiFeedback', 'aiConfidence']))
+      );
+      allow delete: if (isAdmin(request.auth.uid) || isAdmin('admin_demo_1'));
+    }
+  }
+}

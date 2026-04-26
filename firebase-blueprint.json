@@ -1,0 +1,73 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "System user (Admin or Ambassador)",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "ambassador"] },
+        "campus": { "type": "string" },
+        "xp": { "type": "number" },
+        "level": { "type": "number" },
+        "streak": { "type": "number" },
+        "intelligenceScore": { "type": "number" },
+        "status": { "type": "string", "enum": ["active", "dropping", "at_risk"] },
+        "badges": { "type": "array" },
+        "avatarUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Campaign": {
+      "title": "Campaign",
+      "description": "Growth campaign created by Admin",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "goal": { "type": "string" },
+        "adminId": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "active", "completed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "goal", "adminId"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "Specific assignment for an Ambassador",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "campaignId": { "type": "string" },
+        "ambassadorId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "xpValue": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "submitted", "approved", "rejected"] },
+        "proofUrl": { "type": "string" },
+        "aiFeedback": { "type": "string" },
+        "aiConfidence": { "type": "number" },
+        "submittedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["campaignId", "title", "xpValue", "status"]
+    }
+  },
+  "firestore": {
+    "users/{uid}": {
+      "schema": "User",
+      "description": "User profiles and performance data"
+    },
+    "campaigns/{campaignId}": {
+      "schema": "Campaign",
+      "description": "Campaign definitions"
+    },
+    "tasks/{taskId}": {
+      "schema": "Task",
+      "description": "Assignments and proof submissions"
+    }
+  }
+}
