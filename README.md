@@ -10,7 +10,7 @@
 ## 🚀 The Vision
 Nexus isn't just an ambassador portal; it's a **Command & Control** ecosystem. Traditional campus marketing is fragmented and manual. Nexus automates the entire lifecycle—from mission deployment and AI-powered proof verification to global capital disbursement—allowing brands to scale campus operations with surgical precision.
 
-## 🛠️ God-Tier Architecture
+## 🛠️  Architecture
 
 ### 1. Command Center (Admin Dashboard)
 *   **Sector Intelligence:** Real-time monitoring of global field operations across 12 sectors.
@@ -53,7 +53,7 @@ npm install
 npm run dev
 ```
 
-## 🏆 Hackathon Winning Features
+##  Features
 - **Real Payout Integration:** Unlike mock systems, Nexus includes a functional payout request and approval flow designed for actual scalability.
 - **Dual-Dashboard Specialization:** Distinct, high-fidelity interfaces for Admins and Ambassadors that reflect their unique psychological "vibe" (Command vs. Mission).
 - **Gemini-Powered Verification:** Actual implementation of AI to solve the biggest problem in ambassador marketing: *Manual Verification.*
@@ -63,4 +63,4 @@ npm run dev
 ## 📡 Live Stream
 **Access the live Alpha Sector here:** [Nexus Live Preview](https://ais-pre-kqfgffotsmesp4j45x3tc5-247274064816.asia-southeast1.run.app)
 
-*Built with ♥️ by the Nexus Core Team for the Global Hackathon Circuit.*
+*Built with  Nexus Core Team for  Hackathon Circuit.*
